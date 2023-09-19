@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVR Menu Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .menu-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 300px;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 15px;
+        }
+        .menu-item {
+            font-size: 18px;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <h1>SA Youth Support Line IVR Menu</h1>
+        <div class="menu-item" onclick="showSubMenu('resetPassword')">1. Reset Password</div>
+        <div class="menu-item" onclick="showSubMenu('exploreOpportunities')">2. Explore Opportunities</div>
+        <div class="menu-item" onclick="showSubMenu('speakToGuide')">3. Speak to a Guide</div>
+        <div class="menu-item" onclick="showSubMenu('partnerAssistance')">4. Partner Assistance</div>
+        <div class="menu-item" onclick="showSubMenu('multilingualSupport')">5. Multilingual Support</div>
+        <div class="menu-item" onclick="showSubMenu('returnToMainMenu')">6. Return to Main Menu</div>
+        <div class="menu-item" onclick="showSubMenu('moreInfo')">7. More Information</div>
+        <div id="subMenu" style="display: none; margin-top: 15px;">
+            <!-- Placeholder for submenu content -->
+        </div>
+    </div>
+
+    <script>
+        function showSubMenu(option) {
+            const subMenu = document.getElementById('subMenu');
+            let content = '';
+
+            switch (option) {
+                case 'resetPassword':
+                    content = 'Option 1: For help with resetting your password, creating a profile, or any other assistance, press 1.';
+                    break;
+                case 'exploreOpportunities':
+                    content = 'Option 2: To inquire about opportunities, including updates on significant projects such as the Dept of Basic Education Teachers Assistant Program, press 2.';
+                    break;
+                case 'speakToGuide':
+                    content = 'Option 3: To speak to a Guide, press 3.';
+                    break;
+                case 'partnerAssistance':
+                    content = 'Option 4: Are you a partner looking for assistance with accessing your profile or posting opportunities? Press 4.';
+                    break;
+                case 'multilingualSupport':
+                    content = 'Option 5: To access the menu in a different language, press 5. (Multilingual support emphasized)';
+                    break;
+                case 'returnToMainMenu':
+                    content = 'Option 6: To return to the main menu, press 6.';
+                    break;
+                case 'moreInfo':
+                    content = 'Option 7: For more information about SA Youth, press 7.';
+                    break;
+                default:
+                    break;
+            }
+
+            subMenu.style.display = 'block';
+            subMenu.innerHTML = content;
+        }
+    </script>
+</body>
+</html>
