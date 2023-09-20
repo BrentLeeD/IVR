@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVR App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .ivr-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .ivr-generator,
+        .ivr-simulator {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        textarea,
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        pre {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        hr {
+            margin-top: 20px;
+        }
+
+        h4 {
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .submenu-choice {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .submenu-choice label {
+            font-weight: normal;
+        }
+
+        .ivr-simulator {
+            display: none;
+            flex-direction: column;
+        }
+
+        .menu-container {
+            width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+        }
+
+        .menu-item {
+            margin: 10px;
+            padding: 10px;
+            background-color: #009688;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .submenu-item {
+            margin: 5px;
+            padding: 5px;
+            background-color: #00796b;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <h1>IVR App</h1>
+    <div class="ivr-container">
+        <!-- IVR JSON Schema Generator -->
+        <div class="ivr-generator">
+            <h2>IVR JSON Schema Generator</h2>
+            <form id="schemaForm">
+                <label for="welcomeMessage">Welcome Message:</label>
+                <textarea id="welcomeMessage" rows="3" cols="50" required></textarea>
+                <label for="outOfHoursMessage">Out of Hours Message:</label>
+                <textarea id="outOfHoursMessage" rows="3" cols="50" required></textarea>
+                <label for="menuOptionsCount">Number of Menu Options:</label>
+                <input type="number" id="menuOptionsCount" min="1" max="10" required>
+                <div id="menuOptionInputs"></div>
+                <button type="button" onclick="generateIVRSchema()">Generate IVR JSON Schema</button>
+            </form>
+            <pre id="jsonSchemaResult"></pre>
+        </div>
+
+        <!-- IVR Simulator -->
+        <div class="ivr-simulator" id="ivrSimulator">
+            <div class="menu-container" id="ivrMenu">
+                <h3>IVR Menu</h3>
+                <!-- IVR menu content will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateIVRSchema() {
+            const welcomeMessage = document.getElementById('welcomeMessage').value;
+            const outOfHoursMessage = document.getElementById('outOfHoursMessage').value;
+            const menuOptionsCount = parseInt(document.getElementById('menuOptionsCount').value);
+
+            const menuOptions = [];
+            for (let i = 1; i <= menuOptionsCount; i++) {
+                const optionNumber = i.toString();
+                const optionText = document.getElementById(`optionText${i}`).value;
+                const submenuChoices = [];
+
+                // Generate submenu choices for each option
+                const submenuChoicesCount = parseInt(document.getElementById(`submenuChoicesCount${i}`).value);
+                for (let j = 1; j <= submenuChoicesCount; j++) {
+                    const choiceNumber = j.toString();
+                    const choiceText = document.getElementById(`choiceText${i}-${j}`).value;
+
+                    submenuChoices.push({
+                        choice_number: choiceNumber,
+                        choice_text: choiceText,
+                        submenu_choices: [], // Submenu choices of submenu are empty for now
+                    });
+                }
+
+                menuOptions.push({
+                    option_number: optionNumber,
+                    option_text: optionText,
+                    submenu_choices: submenuChoices,
+                });
+            }
+
+            const ivrSchema = {
+                ivr_menu: {
+                    welcome_message: welcomeMessage,
+                    out_of_hours_message: {
+                        message: outOfHoursMessage,
+                    },
+                    menu_options: menuOptions,
+                },
+            };
+
+            const jsonSchemaResult = document.getElementById('jsonSchemaResult');
+            jsonSchemaResult.textContent = JSON.stringify(ivrSchema, null, 2);
+
+            // Show the IVR Simulator
+            const ivrSimulator = document.getElementById('ivrSimulator');
+            ivrSimulator.style.display = 'flex';
+            generateIVRMenu(ivrSchema);
+        }
+
+        function generateIVRMenu(ivrSchema) {
+            const ivrMenu = document.getElementById('ivrMenu');
+            ivrMenu.innerHTML = '';
+            
+            const welcomeMessage = document.createElement('h3');
+            welcomeMessage.textContent = ivrSchema.ivr_menu.welcome_message;
+            ivrMenu.appendChild(welcomeMessage);
+
+            if (ivrSchema.ivr_menu.menu_options && ivrSchema.ivr_menu.menu_options.length > 0) {
+                ivrSchema.ivr_menu.menu_options.forEach(option => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.classList.add('menu-item');
+                    optionDiv.textContent = `${option.option_number}. ${option.option_text}`;
+                    optionDiv.addEventListener('click', () => showSubMenu(option.submenu_choices));
+                    ivrMenu.appendChild(optionDiv);
+                });
+            } else {
+                const errorMessage = document.createElement('p');
+                errorMessage.textContent = 'No menu options found in the schema.';
+                ivrMenu.appendChild(errorMessage);
+            }
+        }
+
+        function showSubMenu(submenuChoices) {
+            const ivrMenu = document.getElementById('ivrMenu');
+            ivrMenu.innerHTML = '';
+
+            if (submenuChoices && submenuChoices.length > 0) {
+                submenuChoices.forEach(choice => {
+                    const choiceDiv = document.createElement('div');
+                    choiceDiv.classList.add('submenu-item');
+                    choiceDiv.textContent = `${choice.choice_number}. ${choice.choice_text}`;
+                    choiceDiv.addEventListener('click', () => showSubMenu(choice.submenu_choices));
+                    ivrMenu.appendChild(choiceDiv);
+                });
+            } else {
+                const backButton = document.createElement('div');
+                backButton.classList.add('submenu-item');
+                backButton.textContent = 'Back to Main Menu';
+                backButton.addEventListener('click', () => generateIVRMenu(ivrSchema));
+                ivrMenu.appendChild(backButton);
+            }
+        }
+
+        // Dynamically generate input fields for submenu choices based on option count
+        document.getElementById('menuOptionsCount').addEventListener('input', function () {
+            const menuOptionsCount = parseInt(this.value);
+            const menuOptionInputs = document.getElementById('menuOptionInputs');
+            menuOptionInputs.innerHTML = '';
+
+            for (let i = 1; i <= menuOptionsCount; i++) {
+                const optionNumber = i.toString();
+                const optionInput = document.createElement('div');
+                optionInput.innerHTML = `
+                    <hr>
+                    <h4>Menu Option ${i}</h4>
+                    <label for="optionText${i}">Text for Menu Option ${i}:</label>
+                    <input type="text" id="optionText${i}" required>
+                    <label for="submenuChoicesCount${i}">Number of Submenu Choices for Option ${i}:</label>
+                    <input type="number" id="submenuChoicesCount${i}" min="0">
+                    <div id="submenuChoiceInputs${i}"></div>
+                `;
+                menuOptionInputs.appendChild(optionInput);
+
+                // Add event listener to dynamically generate submenu choice inputs
+                document.getElementById(`submenuChoicesCount${i}`).addEventListener('input', function () {
+                    const submenuChoicesCount = parseInt(this.value);
+                    const submenuChoiceInputs = document.getElementById(`submenuChoiceInputs${i}`);
+                    submenuChoiceInputs.innerHTML = '';
+
+                    for (let j = 1; j <= submenuChoicesCount; j++) {
+                        const choiceNumber = j.toString();
+                        const choiceInput = document.createElement('div');
+                        choiceInput.classList.add('submenu-choice');
+                        choiceInput.innerHTML = `
+                            <label for="choiceText${i}-${j}">Text for Submenu Choice ${j}:</label>
+                            <input type="text" id="choiceText${i}-${j}">
+                        `;
+                        submenuChoiceInputs.appendChild(choiceInput);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
