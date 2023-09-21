@@ -125,6 +125,50 @@
             cursor: pointer;
             border-radius: 3px;
         }
+        .flow-diagram {
+    border: 2px solid #009688;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px;
+    width: fit-content;
+}
+
+.ivr-box {
+    border: 2px solid #009688;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px;
+    width: 300px;
+}
+
+.option-box {
+    border: 2px solid #00796b;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px;
+}
+
+.choice-box {
+    border: 2px solid #00796b;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+}
+
+.arrow {
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+}
+
+.right-arrow {
+    border-top: 20px solid #ccc;
+}
     </style>
 </head>
 <body>
@@ -145,7 +189,14 @@
             </form>
             <pre id="jsonSchemaResult"></pre>
         </div>
-
+        <div class="ivr-container">
+            <!-- ... (IVR Generator and Simulator sections) ... -->
+            
+            <!-- Add a section for the flow diagram -->
+            <div class="flow-diagram" id="flowDiagram">
+                <h2>IVR Flow Diagram</h2>
+            </div>
+        </div>
         <!-- IVR Simulator -->
         <div class="ivr-simulator" id="ivrSimulator">
             <div class="menu-container" id="ivrMenu">
@@ -156,6 +207,38 @@
     </div>
 
     <script>
+        function generateFlowDiagram(ivrSchema) {
+    const flowDiagram = document.getElementById('flowDiagram');
+    flowDiagram.innerHTML = ''; // Clear previous diagram if any
+    
+    // Create a box for the main IVR menu
+    const ivrBox = document.createElement('div');
+    ivrBox.classList.add('ivr-box');
+    ivrBox.innerHTML = `
+        <h3>Welcome to the SA Youth Support Line</h3>
+        <p>We are here to support you and other young people on your journey to learning and earning.</p>
+    `;
+    flowDiagram.appendChild(ivrBox);
+
+    // Generate boxes for menu options and their submenu choices
+    ivrSchema.ivr_menu.menu_options.forEach(option => {
+        const optionBox = document.createElement('div');
+        optionBox.classList.add('option-box');
+        optionBox.innerHTML = `<p>Press ${option.option_number}: ${option.option_text}</p>`;
+        
+        // Add submenu choices, if any
+        if (option.submenu_choices.length > 0) {
+            option.submenu_choices.forEach(choice => {
+                const choiceBox = document.createElement('div');
+                choiceBox.classList.add('choice-box');
+                choiceBox.innerHTML = `<p>${choice.choice_number}. ${choice.choice_text}</p>`;
+                optionBox.appendChild(choiceBox);
+            });
+        }
+        
+        ivrBox.appendChild(optionBox);
+    });
+}
         function generateIVRSchema() {
             const welcomeMessage = document.getElementById('welcomeMessage').value;
             const outOfHoursMessage = document.getElementById('outOfHoursMessage').value;
@@ -199,7 +282,7 @@
 
             const jsonSchemaResult = document.getElementById('jsonSchemaResult');
             jsonSchemaResult.textContent = JSON.stringify(ivrSchema, null, 2);
-
+            generateFlowDiagram(ivrSchema);
             // Show the IVR Simulator
             const ivrSimulator = document.getElementById('ivrSimulator');
             ivrSimulator.style.display = 'flex';
