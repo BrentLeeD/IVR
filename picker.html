@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cipher Generator Picker</title>
+    <title>Looping Cipher Generator Picker</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -16,6 +16,7 @@
         }
         .picker-container {
             width: 300px;
+            height: 220px;
             background-color: #d1d5db;
             border-radius: 10px;
             overflow: hidden;
@@ -76,19 +77,13 @@
             position: absolute;
             left: 0;
             right: 0;
-            top: 50%;
+            top: 60%;
             height: 36px;
-            border-top: 1px solid #9ca3af;
-            border-bottom: 1px solid #9ca3af;
+            border-top: 3px solid #9ca3af;
+            border-bottom: 3px solid #9ca3af;
             pointer-events: none;
             z-index: 2;
-        }
-        .cipher-display {
-            background-color: #f3f4f6;
-            padding: 10px;
-            text-align: center;
-            font-size: 18px;
-            border-top: 1px solid #9ca3af;
+            transform: translateY(-50%);
         }
     </style>
 </head>
@@ -104,7 +99,6 @@
             <div class="picker-wheel" id="numberWheel"></div>
         </div>
         <div class="selection-indicator"></div>
-        <div class="cipher-display" id="cipherDisplay">Cipher: </div>
     </div>
 
     <script>
@@ -128,7 +122,10 @@
             const content = document.createElement('div');
             content.className = 'wheel-items';
             
-            items.forEach(item => {
+            // Add extra items for looping effect
+            const extendedItems = [...items, ...items, ...items];
+            
+            extendedItems.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'wheel-item';
                 div.textContent = item;
@@ -141,7 +138,7 @@
 
             function handleStart(clientY) {
                 startY = clientY;
-                currentY = -wheels[id].currentIndex * 36;
+                currentY = -wheels[id].currentIndex * 36 - items.length * 36;
                 isDragging = true;
             }
 
@@ -175,21 +172,17 @@
 
         function moveWheel(id, indexChange) {
             const wheel = wheels[id];
-            wheel.currentIndex = Math.max(0, Math.min(wheel.items.length - 1, wheel.currentIndex + indexChange));
+            wheel.currentIndex = (wheel.currentIndex + indexChange + wheel.items.length) % wheel.items.length;
             wheel.value = generateRandomValue();
             updateWheel(id);
-            updateCipher();
         }
 
         function updateWheel(id) {
             const wheel = document.getElementById(id);
             const content = wheel.querySelector('.wheel-items');
-            content.style.transform = `translateY(${-wheels[id].currentIndex * 36}px)`;
-        }
-
-        function updateCipher() {
-            const cipher = Object.values(wheels).map(wheel => wheel.value).join('');
-            document.getElementById('cipherDisplay').textContent = `Cipher: ${cipher}`;
+            const itemHeight = 36;
+            const offset = -wheels[id].currentIndex * itemHeight - wheels[id].items.length * itemHeight;
+            content.style.transform = `translateY(${offset}px)`;
         }
 
         function cancel() {
@@ -205,7 +198,6 @@
             createWheel(id, wheels[id].items);
             wheels[id].value = generateRandomValue();
         });
-        updateCipher();
     </script>
 </body>
 </html>
